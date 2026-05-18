@@ -1,194 +1,198 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Task
 {
+
+    class BankAccount
+    {
+        public string AccountHolder { get; private set; }
+        public string AccountNumber { get; private set; }
+        public decimal Balance { get; private set; }
+
+        private List<string> transactions = new List<string>();
+
+        public BankAccount(string name, string accNo, decimal balance)
+        {
+            AccountHolder = name;
+            AccountNumber = accNo;
+            Balance = balance;
+        }
+
+        public void Deposit(decimal amount)
+        {
+            if (amount > 0)
+            {
+                Balance += amount;
+                transactions.Add($"Deposited: {amount:C}");
+            }
+        }
+
+        public bool Withdraw(decimal amount)
+        {
+            if (amount > 0 && amount <= Balance)
+            {
+                Balance -= amount;
+                transactions.Add($"Withdrawn: {amount:C}");
+                return true;
+            }
+            return false;
+        }
+
+        public void ShowDetails()
+        {
+            Console.WriteLine($"Name           : {AccountHolder}");
+            Console.WriteLine($"Account Number : {AccountNumber}");
+            Console.WriteLine($"Balance        : {Balance:C}");
+        }
+
+      
+        public void ShowTransactions()
+        {
+            Console.WriteLine("\n------ TRANSACTION HISTORY ------");
+
+            if (transactions.Count == 0)
+            {
+                
+                Console.WriteLine("No transactions yet.");
+                return;
+            }
+
+            foreach (var t in transactions)
+            {
+                Console.WriteLine(t);
+            }
+        }
+    }
+
     internal class Program
     {
-        // Global Variables
-        static string name;
-        static string acNumber;
-        static decimal opBalance;
         static int option;
-
-        static void Header()
-        {
-            Console.WriteLine("==========================================");
-            Console.WriteLine("          HATTON NATIONAL BANK            ");
-            Console.WriteLine("==========================================");
-        }
-
-        static void Welcome()
-        {
-            Console.WriteLine("********************************");
-            Console.WriteLine(" Welcome to Hatton National Bank");
-            Console.WriteLine("********************************");
-        }
 
         static void Main(string[] args)
         {
-            Header();
-            Welcome();
 
-            Console.WriteLine("\n------------------------------------");
-            Console.WriteLine("           Account Details          ");
-            Console.WriteLine("------------------------------------");
+            Console.WriteLine("Enter Account Holder Name: ");
+            string name = Console.ReadLine()!;
 
-            // Account Holder Name
-            Console.Write("Enter Account Holder Name: ");
-            name = Console.ReadLine()!;
+            Console.WriteLine("Enter Account Number: ");
+            string accNo = Console.ReadLine()!;
 
-            // Account Number Validation
-            while (string.IsNullOrEmpty(acNumber))
+            decimal balance;
+            while (!decimal.TryParse(Console.ReadLine(), out balance))
             {
-                Console.Write($"{name}, Enter Your Account Number: ");
-                acNumber = Console.ReadLine()!;
-
-                if (string.IsNullOrEmpty(acNumber))
-                {
-                    Console.WriteLine("Enter a valid account number.");
-                }
+                Console.WriteLine("Enter valid balance:");
             }
 
-            // Opening Balance Validation
-            while (true)
-            {
-                Console.Write("Enter Opening Balance: ");
+            BankAccount account = new BankAccount(name, accNo, balance);
 
-                if (decimal.TryParse(Console.ReadLine(), out opBalance))
-                {
-                    break;
-                }
-
-                Console.WriteLine("Invalid balance entered. Please enter a valid amount.");
-            }
-
-            // MAIN MENU LOOP 
             while (true)
             {
                 Console.Clear();
+
                 Header();
-                Welcome();
 
-                Console.WriteLine("\n-------------- SUMMARY --------------");
-                Console.WriteLine($"Account Holder Name : {name}");
-                Console.WriteLine($"Account Number      : {acNumber}");
-                Console.WriteLine($"Opening Balance     : {opBalance:C}");
-                Console.WriteLine("-------------------------------------");
+ 
+                ShowMenu();
 
-                Menu();
+                Console.Write("Select option: ");
+                option = int.Parse(Console.ReadLine()!);
 
-                // ✅ Pause screen before looping again
-                Console.WriteLine("\nPress any key to continue...");
+                Console.Clear();
+
+                switch (option)
+                {
+                    case 1:
+                        account.ShowDetails();
+                        break;
+
+                    case 2:
+                        Console.WriteLine($"Balance: {account.Balance:C}");
+                        break;
+
+                    case 3:
+                        Deposit(account);
+                        break;
+
+                    case 4:
+                        Withdraw(account);
+                        break;
+
+                    case 5:
+                        account.ShowTransactions();
+                        break;
+
+                    case 6:
+                        Console.WriteLine("Thank you!");
+                        return; // Q48: Stop loop
+                }
+
+                // Q49: Pause screen
+                Console.WriteLine("\nPress any key...");
                 Console.ReadKey();
             }
         }
 
-        static void Menu()
+        // =========================
+        // PART 10: ORGANIZE METHODS
+        // =========================
+
+        // Welcome message method
+        static void Header()
         {
-            Console.WriteLine("\n============== MENU ==============");
-            Console.WriteLine("1. View Account");
+            Console.WriteLine("=================================");
+            Console.WriteLine("     HATTON NATIONAL BANK        ");
+            Console.WriteLine("=================================");
+        }
+
+        // Menu display method
+        static void ShowMenu()
+        {
+            Console.WriteLine("\n1. View Account");
             Console.WriteLine("2. Check Balance");
             Console.WriteLine("3. Deposit");
             Console.WriteLine("4. Withdraw");
-            Console.WriteLine("5. Exit");
-            Console.WriteLine("==================================");
-
-            Console.Write("Select an option (1-5): ");
-            option = int.Parse(Console.ReadLine()!);
-
-            Selectors();
+            Console.WriteLine("5. Transaction History");
+            Console.WriteLine("6. Exit");
         }
 
-        static void Selectors()
+        // Q54: Deposit method moved out
+        static void Deposit(BankAccount acc)
         {
-            if (option == 1)
+            Console.Write("Enter deposit amount: ");
+
+            decimal amount;
+            if (decimal.TryParse(Console.ReadLine(), out amount))
             {
-                Console.WriteLine("\n------ ACCOUNT DETAILS ------");
-                Console.WriteLine($"Name           : {name}");
-                Console.WriteLine($"Account Number : {acNumber}");
-                Console.WriteLine($"Balance        : {opBalance:C}");
-            }
-            else if (option == 2)
-            {
-                Console.WriteLine($"Balance        : {opBalance:C}");
-            }
-            else if (option == 3)
-            {
-                decimal amount;
-
-                while (true)
-                {
-                    Console.Write("Enter The Deposit Amount: ");
-
-                    if (decimal.TryParse(Console.ReadLine()!, out amount))
-                    {
-                        if (amount > 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Amount must be greater than zero.");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid amount. Please enter a numeric value.");
-                    }
-                }
-
-                opBalance += amount;
-
-                Console.WriteLine("Deposit Successful!");
-                Console.WriteLine($"Deposited Amount: {amount}");
-                Console.WriteLine($"New Balance: {opBalance:C}");
-            }
-            else if (option == 4)
-            {
-                decimal withdraw;
-
-                while (true)
-                {
-                    Console.Write("Enter the Withdrawal Amount: ");
-
-                    if (decimal.TryParse(Console.ReadLine(), out withdraw))
-                    {
-                        if (withdraw > 0)
-                        {
-                            if (withdraw <= opBalance)
-                            {
-                                opBalance -= withdraw;
-
-                                Console.WriteLine("Withdraw Successful!");
-                                Console.WriteLine($"Withdrawn Amount: {withdraw}");
-                                Console.WriteLine($"Remaining Balance: {opBalance:C}");
-
-                                break;
-                            }
-                            else
-                            {
-                                Console.WriteLine("Insufficient Balance!");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Amount must be greater than 0");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid input. Please enter a number.");
-                    }
-                }
-            }
-            else if (option == 5)
-            {
-                Console.WriteLine("Thank you for using Hatton National Bank!");
-                Environment.Exit(0); // ✅ Proper program exit
+                acc.Deposit(amount);
+                Console.WriteLine("Deposit successful!");
             }
             else
             {
-                Console.WriteLine("Invalid option! Please select 1-5.");
+                Console.WriteLine("Invalid amount");
+            }
+        }
+
+        // Q55: Withdraw method moved out
+        static void Withdraw(BankAccount acc)
+        {
+            Console.Write("Enter withdraw amount: ");
+
+            decimal amount;
+            if (decimal.TryParse(Console.ReadLine(), out amount))
+            {
+                if (acc.Withdraw(amount))
+                {
+                    Console.WriteLine("Withdraw successful!");
+                }
+                else
+                {
+                    Console.WriteLine("Insufficient balance!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid amount");
             }
         }
     }
